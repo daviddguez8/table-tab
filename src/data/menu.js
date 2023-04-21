@@ -16,6 +16,10 @@ export const MENU = [
         price: 10.99,
     },
     {
+        name: 'Salmon',
+        price: 10.99,
+    },
+    {
         name: 'Sushi',
         price: 12.99,
     },
