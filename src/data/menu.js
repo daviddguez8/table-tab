@@ -36,7 +36,7 @@ export const MENU = [
         price: 0,
     },
     {
-        name: 'David\'s Sister',
+        name: 'David\'s Sisters',
         price: 0,
     },
 ];
