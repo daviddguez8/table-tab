@@ -3,7 +3,7 @@ import './KitchenView.css';
 import { useState } from 'react';
 import { TABLES } from '../../data/tables';
 import { MENU } from '../../data/menu';
-import { foodQueue } from '../../backend/foodQueue';
+import { addItemToCook } from '../../backend/foodQueue';
 import { markItemReady } from '../../backend/markReady';
 
 
@@ -12,6 +12,18 @@ function KitchenView() {
     const [addingItems, setAddingItems] = useState(false);
     const [selectedItemIdx, setSelectedItemIdx] = useState(-1);
     const [selectedItemQuantity, setSelectedItemQuantity] = useState(0);
+
+    const queue = () => {
+        console.log(selectedItemIdx);
+        const itemToAdd = MENU[selectedItemIdx];
+        console.log(itemToAdd);
+        itemToAdd.quantity = selectedItemQuantity;
+
+        addItemToCook(selectedTable, itemToAdd);
+
+        setSelectedItemQuantity(0);
+        setSelectedItemIdx(-1);
+    }
 
     const readyItems = () => {
         console.log(selectedItemIdx);
@@ -54,10 +66,6 @@ function KitchenView() {
                 <Row className="table-container">
                     <h2 className="mb-3">{selectedTable}</h2>
                     <p>Available: {TABLES[selectedTable].available ? 'Yes' : 'No'}</p>
-                    <p>Num People: {TABLES[selectedTable].people}</p>
-                    <p>Total ordered: $ TODO COMPLETE</p>
-                    <p>Total paid: $ TODO COMPLETE</p>
-                    <p>Needs Help: {TABLES[selectedTable].needsHelp ? 'Yes' : 'No'}</p>
                     <p>Items to be delivered?: TODO COMPLETE</p>
 
                     {/*Displays only when adding items to order*/}
@@ -116,7 +124,6 @@ function KitchenView() {
                                 <tr key={index}>
                                     <td>{index + 1}</td>
                                     <td>{item.name}</td>
-                                    <td>{item.price}</td>
                                     <td>{item.quantity}</td>
                                     <td>{item.status}</td>
                                 </tr>

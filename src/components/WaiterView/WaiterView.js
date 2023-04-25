@@ -43,10 +43,11 @@ function WaiterView() {
                     <option value="Table 1">Table 1</option>
                     <option value="Table 2">Table 2</option>
                     <option value="Table 3">Table 3</option>
-                    <option value="Table 3">Table 4</option>
+                    <option value="Table 4">Table 4</option>
+                    <option value="Table 5">Table 5</option>
+                    <option value="Table 6">Table 6</option>
+                    <option value="Table 7">Table 7</option>
                 </Form.Select>
-
-
             </Row>
             
             {/*Displays only when a table is selected*/}
@@ -98,7 +99,6 @@ function WaiterView() {
                                     e.preventDefault();
                                     handleItemAdded();
                                 }}>Add to order</Button>
-
                             </Form>
                         </Container>
                     )}
@@ -130,7 +130,6 @@ function WaiterView() {
                 </Row>
             }
         </Container>
-
     );
 }
 
