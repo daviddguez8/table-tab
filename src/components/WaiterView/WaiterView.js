@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { TABLES } from '../../data/tables';
 import { MENU } from '../../data/menu';
 import { addItemToOrder } from '../../backend/addToOrder';
+import { selectTable, selectedTable } from '../../backend/selectTable';
 
 
 function WaiterView() {
@@ -21,6 +22,7 @@ function WaiterView() {
         itemToAdd.quantity = selectedItemQuantity;
 
         addItemToOrder(selectedTable, itemToAdd);
+        selectTable(selectedTable);
     
         setSelectedItemQuantity(0);
         setSelectedItemIdx(-1);

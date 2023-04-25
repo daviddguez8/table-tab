@@ -6,6 +6,7 @@ export const TABLES = {
         maxPeople: 4,
         waiter: '',
         tab: [],
+        waiterAssigned: false
     },
     'Table 2': {
         available: false,
@@ -13,7 +14,8 @@ export const TABLES = {
         people: 0,
         maxPeople: 4,
         waiter: '',
-        tab: []
+        tab: [],
+        waiterAssigned: false
     },
     'Table 3': {
         available: true,
@@ -21,7 +23,8 @@ export const TABLES = {
         people: 0,
         maxPeople: 6,
         waiter: '',
-        tab: []
+        tab: [], 
+        waiterAssigned: false
     },
     'Table 4': {
         available: true,
@@ -29,7 +32,8 @@ export const TABLES = {
         people: 0,
         maxPeople: 6,
         waiter: '',
-        tab: []
+        tab: [], 
+        waiterAssigned: false
     },
     'Table 5': {
         available: true,
@@ -37,7 +41,8 @@ export const TABLES = {
         people: 0,
         maxPeople: 10,
         waiter: '',
-        tab: []
+        tab: [], 
+        waiterAssigned: false
     },
     'Table 6': {
         available: true,
@@ -45,7 +50,8 @@ export const TABLES = {
         people: 0,
         maxPeople: 12,
         waiter: '',
-        tab: []
+        tab: [], 
+        waiterAssigned: false
     },
     'Table 7': {
         available: true,
@@ -53,6 +59,7 @@ export const TABLES = {
         people: 0,
         maxPeople: 8,
         waiter: '',
-        tab: []
+        tab: [], 
+        waiterAssigned: false
     }
 };
