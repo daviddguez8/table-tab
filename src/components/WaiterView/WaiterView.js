@@ -1,9 +1,10 @@
-import { Container, Form, Row, Button, Table, InputGroup, ListGroup } from 'react-bootstrap';
+import { Container, Form, Row, Button, Table } from 'react-bootstrap';
 import './waiterView.css';
 import { useState } from 'react';
 import { TABLES } from '../../data/tables';
 import { MENU } from '../../data/menu';
 import { addItemToOrder } from '../../backend/addToOrder';
+import {STATUSES } from '../../data/statuses';
 
 
 function WaiterView() {
@@ -12,20 +13,22 @@ function WaiterView() {
 
     const [selectedItemIdx, setSelectedItemIdx] = useState(-1);
     const [selectedItemQuantity, setSelectedItemQuantity] = useState(0);
-   
+
 
     const handleItemAdded = () => {
-        console.log(selectedItemIdx);
-        const itemToAdd = MENU[selectedItemIdx];
-        console.log(itemToAdd);
+        const itemInMenu = MENU[selectedItemIdx];
+        const itemToAdd = { name: itemInMenu.name, price: itemInMenu.price };
         itemToAdd.quantity = selectedItemQuantity;
 
         addItemToOrder(selectedTable, itemToAdd);
-    
+
         setSelectedItemQuantity(0);
         setSelectedItemIdx(-1);
     }
 
+    const handleStatusChange = (itemIdx, newStatus) => {
+        
+    }
     return (
         <Container className="main-container">
             <Row className='fixed-top topbar'>
@@ -48,7 +51,7 @@ function WaiterView() {
 
 
             </Row>
-            
+
             {/*Displays only when a table is selected*/}
             {selectedTable !== '' &&
                 <Row className="table-container">
@@ -59,8 +62,6 @@ function WaiterView() {
                     <p>Total paid: $ TODO COMPLETE</p>
                     <p>Needs Help: {TABLES[selectedTable].needsHelp ? 'Yes' : 'No'}</p>
                     <p>Items to be delivered?: TODO COMPLETE</p>
-
-
 
                     {/*Displays only when adding items to order*/}
                     {!addingItems ? (
@@ -121,7 +122,16 @@ function WaiterView() {
                                         <td>{item.name}</td>
                                         <td>{item.price}</td>
                                         <td>{item.quantity}</td>
-                                        <td>{item.status}</td>
+                                        <td>
+                                            <Form.Select required aria-label="Default select example"
+                                                onChange={(e)=> {handleStatusChange(index, e.target.value)}}>
+                                                {STATUSES.map((status, index) => {
+                                                    return (
+                                                        <option key={index} selected={item.status==status}>{status}</option>
+                                                    )
+                                                })}
+                                            </Form.Select>
+                                        </td>
                                     </tr>
                                 )
                             })}
