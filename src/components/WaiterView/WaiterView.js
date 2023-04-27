@@ -5,7 +5,7 @@ import { TABLES } from '../../data/tables';
 import { MENU } from '../../data/menu';
 import { addItemToOrder } from '../../backend/addToOrder';
 import {STATUSES } from '../../data/statuses';
-import { selectTable, selectedTable } from '../../backend/selectTable';
+import { pushMenuToFirebase, pushTablesToFirebase } from '../../backend/firestore';
 
 
 function WaiterView() {
@@ -70,6 +70,7 @@ function WaiterView() {
                         <Button className="mb-3" onClick={(e) => {
                             e.preventDefault();
                             setAddingItems(true);
+                            pushTablesToFirebase();
                         }}> Add items to order: </Button>
                     ) : (
                         <Container style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', }}>
@@ -128,7 +129,7 @@ function WaiterView() {
                                                 onChange={(e)=> {handleStatusChange(index, e.target.value)}}>
                                                 {STATUSES.map((status, index) => {
                                                     return (
-                                                        <option key={index} selected={item.status==status}>{status}</option>
+                                                        <option key={index} selected={item.status===status}>{status}</option>
                                                     )
                                                 })}
                                             </Form.Select>
