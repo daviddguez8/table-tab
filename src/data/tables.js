@@ -1,5 +1,6 @@
 import { fetchToTables } from "../backend/firestore";
 
+//DON'T USE ANYMORE, HERE ONLY FOR RESETING PURPOSES
 export const TABLES = {
     'Table 1': {
         available: true,

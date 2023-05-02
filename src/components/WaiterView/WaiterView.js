@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { MENU } from '../../data/menu';
 import { addItemToOrder } from '../../backend/addToOrder';
 import { STATUSES } from '../../data/statuses';
-import { fetchToTables, pushMenuToFirebase, pushTablesToFirebase } from '../../backend/firestore';
+import { fetchToTables, pushMenuToFirebase, pushTableToFirebase } from '../../backend/firestore';
 
 
 function WaiterView() {
@@ -18,9 +18,7 @@ function WaiterView() {
     const [TABLES, setTables] = useState({});
 
     useEffect(() => {
-        pushTablesToFirebase();
         fetchToTables(setTables)
-        
     }, []);
 
     useEffect(() => {
@@ -34,15 +32,39 @@ function WaiterView() {
         itemToAdd.quantity = selectedItemQuantity;
 
         TABLES[selectedTable].tab = [...TABLES[selectedTable].tab, itemToAdd];
+        
+        pushTableToFirebase(TABLES[selectedTable]);
 
-        addItemToOrder(selectedTable, itemToAdd);
-        pushTablesToFirebase(TABLES);
+        fetchToTables(setTables);
+
         setSelectedItemQuantity(0);
         setSelectedItemIdx(-1);
     }
 
     const handleStatusChange = (itemIdx, newStatus) => {
 
+    }
+
+    const calculateTotal = (tab) => {
+        let total = 0;
+        tab.forEach(item => {
+            total += item.price * item.quantity;
+        });
+        return total.toFixed(2);
+    }
+
+    const calculateTotalPaid = (tab) => {
+        let total = 0;
+        tab.forEach(item => {
+            if (item.status === STATUSES.PAID) {
+                total += item.price * item.quantity;
+            }
+        });
+        return total.toFixed(2);
+    }
+
+    const calculateBalance = (tab) => {
+        return calculateTotal(tab) - calculateTotalPaid(tab);
     }
 
     return (
@@ -59,6 +81,7 @@ function WaiterView() {
                     onChange={(e) => {
                         e.preventDefault();
                         setSelectedTable(e.target.value)
+                        
                     }}>
                     <option>Select table</option>
                     {Object.keys(TABLES).sort().map((tableName, idx) => {
@@ -73,8 +96,9 @@ function WaiterView() {
                     <h2 className="mb-3">{selectedTable}</h2>
                     <p>Available: {TABLES[selectedTable].available ? 'Yes' : 'No'}</p>
                     <p>Num People: {TABLES[selectedTable].people}</p>
-                    <p>Total ordered: $ TODO COMPLETE</p>
-                    <p>Total paid: $ TODO COMPLETE</p>
+                    <p>Total ordered: $ {calculateTotal(TABLES[selectedTable].tab)}</p>
+                    <p>Total paid: $ {calculateTotalPaid(TABLES[selectedTable].tab)}</p>
+                    <p>Remaining balance: $ {calculateBalance(TABLES[selectedTable].tab)}</p>
                     <p>Needs Help: {TABLES[selectedTable].needsHelp ? 'Yes' : 'No'}</p>
                     <p>Items to be delivered?: TODO COMPLETE</p>
 
@@ -88,9 +112,8 @@ function WaiterView() {
                         <Container style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', }}>
                             <Form>
                                 <Form.Select required aria-label="Default select example"
-                                    value={selectedItemIdx}
+                                    value={MENU[selectedItemIdx] ? selectedItemIdx : -1}
                                     onChange={(e) => {
-
                                         console.log(e.target.value);
                                         setSelectedItemIdx(e.target.value)
                                     }}>
@@ -138,10 +161,11 @@ function WaiterView() {
                                         <td>{item.quantity}</td>
                                         <td>
                                             <Form.Select required aria-label="Default select example"
+                                                defaultValue={item.status}
                                                 onChange={(e) => { handleStatusChange(index, e.target.value) }}>
-                                                {STATUSES.map((status, index) => {
+                                                {Object.values(STATUSES).map((status) => {
                                                     return (
-                                                        <option key={index} selected={item.status === status}>{status}</option>
+                                                        <option key={status} selected={item.status === status}>{status}</option>
                                                     )
                                                 })}
                                             </Form.Select>

@@ -1,5 +1,5 @@
-import { TABLES } from "../data/tables";
 import { MENU } from "../data/menu";
+import { STATUSES } from "../data/statuses";
 
 /**
  * Adds an item to a table's order tab, given the table name and item object.
@@ -15,7 +15,7 @@ import { MENU } from "../data/menu";
  * @throws {Error} - If the item object is missing a name, quantity, or price,
  *                   or if the name of the item is not in the MENU.
  */
-export const addItemToOrder = (tableName, item) => {
+export const addItemToOrder = (TABLES, tableName, item) => {
     const table = TABLES[tableName];
 
     // Validate the item object
@@ -35,7 +35,7 @@ export const addItemToOrder = (tableName, item) => {
         throw new Error('Invalid given item: Item is not in menu');
     }
     
-    item.status = 'Ordered';
+    item.status = STATUSES.ORDERED;
     item.paid = false;
     item.cooked = false;
     table.tab.push(item);

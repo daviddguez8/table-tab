@@ -1,1 +1,7 @@
-export const STATUSES = ['Ordered', 'Cooked', 'Delivered', 'Paid'];
+export const STATUSES = {
+    ORDERED: 'Ordered',
+    COOKING: 'Cooking',
+    COOKED: 'Cooked',
+    DELIVERED: 'Delivered',
+    PAID: 'Paid'
+}
