@@ -6,6 +6,7 @@ import { MENU } from '../../data/menu';
 import { addItemToOrder } from '../../backend/addToOrder';
 import { STATUSES } from '../../data/statuses';
 import { fetchToTables, pushMenuToFirebase, pushTableToFirebase } from '../../backend/firestore';
+import { deleteItemFromTab } from '../../backend/deleteFromTab';
 
 
 function WaiterView() {
@@ -26,16 +27,19 @@ function WaiterView() {
     }, [selectedTable])
 
 
-    const handleItemAdded = () => {
+    const handleItemAdded = async () => {
+        if (selectedItemIdx == -1) {
+            alert('Please select an item from the menu');
+            return;
+        }
         const itemInMenu = MENU[selectedItemIdx];
         const itemToAdd = { name: itemInMenu.name, price: itemInMenu.price };
         itemToAdd.quantity = selectedItemQuantity;
 
         TABLES[selectedTable].tab = [...TABLES[selectedTable].tab, itemToAdd];
         
-        pushTableToFirebase(TABLES[selectedTable]);
-
-        fetchToTables(setTables);
+        await pushTableToFirebase(TABLES[selectedTable]);
+        await fetchToTables(setTables);
 
         setSelectedItemQuantity(0);
         setSelectedItemIdx(-1);
@@ -67,6 +71,15 @@ function WaiterView() {
         return calculateTotal(tab) - calculateTotalPaid(tab);
     }
 
+    const handleDeleteItem = (itemTabIndex) => {
+        TABLES[selectedTable].tab = deleteItemFromTab(TABLES[selectedTable].tab, itemTabIndex)
+        setTables(TABLES);
+        pushTableToFirebase(TABLES[selectedTable]).then(() => {
+            fetchToTables(setTables);
+        });
+        
+    }
+
     return (
         <Container className="main-container">
             <Row className='fixed-top topbar'>
@@ -85,23 +98,29 @@ function WaiterView() {
                     }}>
                     <option>Select table</option>
                     {Object.keys(TABLES).sort().map((tableName, idx) => {
-                        return <option value={tableName} key={idx}>{tableName}</option>
+                        return <option value={tableName} key={idx} style={ TABLES[tableName].needsHelp? {backgroundColor: "red"}:{}}>{tableName}</option>
                     })}
                 </Form.Select>
             </Row>
 
             {/*Displays only when a table is selected*/}
             {selectedTable !== '' &&
-                <Row className="table-container">
+                <Row className="table-container mb-3">
+                    <Container className="table-info-container mb-3">
+                        
                     <h2 className="mb-3">{selectedTable}</h2>
                     <p>Available: {TABLES[selectedTable].available ? 'Yes' : 'No'}</p>
                     <p>Num People: {TABLES[selectedTable].people}</p>
                     <p>Total ordered: $ {calculateTotal(TABLES[selectedTable].tab)}</p>
                     <p>Total paid: $ {calculateTotalPaid(TABLES[selectedTable].tab)}</p>
                     <p>Remaining balance: $ {calculateBalance(TABLES[selectedTable].tab)}</p>
-                    <p>Needs Help: {TABLES[selectedTable].needsHelp ? 'Yes' : 'No'}</p>
+                    {/*TODO: Complete attend call funcionality */}
+                    <p>Needs Help: {TABLES[selectedTable].needsHelp ? 'Yes' : 'No'} <Button variant="outline-info">Attend call</Button></p>
+                    {/*TODO: Complete this functionality */}
                     <p>Items to be delivered?: TODO COMPLETE</p>
 
+                    </Container>
+                    
                     {/*Displays only when adding items to order*/}
                     {!addingItems ? (
                         <Button className="mb-3" onClick={(e) => {
@@ -170,13 +189,16 @@ function WaiterView() {
                                                 })}
                                             </Form.Select>
                                         </td>
+                                        <td>
+                                            <Button variant="danger" onClick={() => {handleDeleteItem(index)}}>Delete</Button>
+                                        </td>
                                     </tr>
                                 )
                             })}
                         </tbody>
                     </Table>
                 </Row>
-            }
+            } 
         </Container>
     );
 }

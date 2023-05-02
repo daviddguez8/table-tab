@@ -30,15 +30,13 @@ export const pushTableToFirebase = async (table) => {
     const db = getFirestore(app);
     const tablesCollection = collection(db, 'tables');
 
-    console.log(table);
 
     //Query the tables collection to get the document where doc.name == table.name
     const q = query(tablesCollection, where("name", "==", table.name));
 
     //Get the document reference
-    getDocs(q).then((querySnapshot) => {
+    await getDocs(q).then((querySnapshot) => {
         const thisTable = querySnapshot.docs[0];
-        console.log(thisTable);
         setDoc(thisTable.ref, {
             name: table.name,
             available: table.available,
@@ -49,7 +47,7 @@ export const pushTableToFirebase = async (table) => {
             tab: table.tab,
             waiterAssigned: table.waiterAssigned
         }).then(() => {
-            console.log("Document successfully written!");
+            console.log("Table successfully written!");
         }
         ).catch((error) => {
             console.error("Error writing document: ", error);
@@ -72,6 +70,14 @@ export const fetchToTables = async (setTables) => {
         });
         setTables(tables);
     });
+
+    onSnapshot(q, (querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            tables[doc.data().name] = doc.data();
+        });
+        setTables(tables);
+    });
+
 }
 
 
