@@ -1,3 +1,5 @@
+import { fetchToTables } from "../backend/firestore";
+
 export const TABLES = {
     'Table 1': {
         available: true,
@@ -63,3 +65,4 @@ export const TABLES = {
         waiterAssigned: false
     }
 };
+

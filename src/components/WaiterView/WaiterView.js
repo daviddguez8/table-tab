@@ -1,11 +1,11 @@
 import { Container, Form, Row, Button, Table } from 'react-bootstrap';
 import './waiterView.css';
-import { useState } from 'react';
-import { TABLES } from '../../data/tables';
+import { useEffect, useState } from 'react';
+//import { TABLES } from '../../data/tables';
 import { MENU } from '../../data/menu';
 import { addItemToOrder } from '../../backend/addToOrder';
-import {STATUSES } from '../../data/statuses';
-import { pushMenuToFirebase, pushTablesToFirebase } from '../../backend/firestore';
+import { STATUSES } from '../../data/statuses';
+import { fetchToTables, pushMenuToFirebase, pushTablesToFirebase } from '../../backend/firestore';
 
 
 function WaiterView() {
@@ -15,21 +15,36 @@ function WaiterView() {
     const [selectedItemIdx, setSelectedItemIdx] = useState(-1);
     const [selectedItemQuantity, setSelectedItemQuantity] = useState(0);
 
+    const [TABLES, setTables] = useState({});
+
+    useEffect(() => {
+        pushTablesToFirebase();
+        fetchToTables(setTables)
+        
+    }, []);
+
+    useEffect(() => {
+        console.log(selectedTable);
+    }, [selectedTable])
+
 
     const handleItemAdded = () => {
         const itemInMenu = MENU[selectedItemIdx];
         const itemToAdd = { name: itemInMenu.name, price: itemInMenu.price };
         itemToAdd.quantity = selectedItemQuantity;
 
-        addItemToOrder(selectedTable, itemToAdd);
+        TABLES[selectedTable].tab = [...TABLES[selectedTable].tab, itemToAdd];
 
+        addItemToOrder(selectedTable, itemToAdd);
+        pushTablesToFirebase(TABLES);
         setSelectedItemQuantity(0);
         setSelectedItemIdx(-1);
     }
 
     const handleStatusChange = (itemIdx, newStatus) => {
-        
+
     }
+
     return (
         <Container className="main-container">
             <Row className='fixed-top topbar'>
@@ -39,18 +54,16 @@ function WaiterView() {
             <Row className="content-container mb-3">
                 <h3>Select a table from below:</h3>
                 <Form.Select aria-label="Default select example"
+                    key={selectedTable}
+                    value={selectedTable}
                     onChange={(e) => {
                         e.preventDefault();
                         setSelectedTable(e.target.value)
                     }}>
                     <option>Select table</option>
-                    <option value="Table 1">Table 1</option>
-                    <option value="Table 2">Table 2</option>
-                    <option value="Table 3">Table 3</option>
-                    <option value="Table 4">Table 4</option>
-                    <option value="Table 5">Table 5</option>
-                    <option value="Table 6">Table 6</option>
-                    <option value="Table 7">Table 7</option>
+                    {Object.keys(TABLES).sort().map((tableName, idx) => {
+                        return <option value={tableName} key={idx}>{tableName}</option>
+                    })}
                 </Form.Select>
             </Row>
 
@@ -70,7 +83,6 @@ function WaiterView() {
                         <Button className="mb-3" onClick={(e) => {
                             e.preventDefault();
                             setAddingItems(true);
-                            pushTablesToFirebase();
                         }}> Add items to order: </Button>
                     ) : (
                         <Container style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', }}>
@@ -126,10 +138,10 @@ function WaiterView() {
                                         <td>{item.quantity}</td>
                                         <td>
                                             <Form.Select required aria-label="Default select example"
-                                                onChange={(e)=> {handleStatusChange(index, e.target.value)}}>
+                                                onChange={(e) => { handleStatusChange(index, e.target.value) }}>
                                                 {STATUSES.map((status, index) => {
                                                     return (
-                                                        <option key={index} selected={item.status===status}>{status}</option>
+                                                        <option key={index} selected={item.status === status}>{status}</option>
                                                     )
                                                 })}
                                             </Form.Select>
