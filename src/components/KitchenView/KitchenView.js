@@ -3,36 +3,46 @@ import './KitchenView.css';
 import { useState } from 'react';
 import { TABLES } from '../../data/tables';
 import { MENU } from '../../data/menu';
-import { addItemToCook } from '../../backend/foodQueue';
+import { itemsToCook } from '../../backend/foodQueue';
 import { markItemReady } from '../../backend/markReady';
+import { addItemToOrder } from '../../backend/addToOrder';
 
 
 function KitchenView() {
     const [selectedTable, setSelectedTable] = useState('');
     const [addingItems, setAddingItems] = useState(false);
+    const [markingReady, setMarkingReady] = useState(false);
     const [selectedItemIdx, setSelectedItemIdx] = useState(-1);
     const [selectedItemQuantity, setSelectedItemQuantity] = useState(0);
 
     const queue = () => {
-        console.log(selectedItemIdx);
         const itemToAdd = MENU[selectedItemIdx];
         console.log(itemToAdd);
-        itemToAdd.quantity = selectedItemQuantity;
+        const tableTab = TABLES[selectedTable];
 
-        addItemToCook(selectedTable, itemToAdd);
-
-        setSelectedItemQuantity(0);
-        setSelectedItemIdx(-1);
+        // console.log(selectedTableTab);
+        // console.log(items);
+        // items.tab = selectedTableTab;
+        itemsToCook(tableTab)
+        // itemToCook(selectedTable, items);
+        // setSelectedTableTab([]);
     }
 
     const readyItems = () => {
         console.log(selectedItemIdx);
+        const items = TABLES[selectedTable];
+        console.log(items.tab);
+        markItemReady(selectedTable, items);
+        setSelectedItemQuantity(0);
+        setSelectedItemIdx(-1);
+    }
+
+    const handleItemAdded = () => {
+        console.log(selectedItemIdx);
         const itemToAdd = MENU[selectedItemIdx];
         console.log(itemToAdd);
         itemToAdd.quantity = selectedItemQuantity;
-
-        markItemReady(selectedTable, itemToAdd);
-
+        addItemToOrder(selectedTable, itemToAdd);
         setSelectedItemQuantity(0);
         setSelectedItemIdx(-1);
     }
@@ -48,7 +58,7 @@ function KitchenView() {
                 <Form.Select aria-label="Default select example"
                              onChange={(e) => {
                                  e.preventDefault();
-                                 setSelectedTable(e.target.value)
+                                 setSelectedTable(e.target.value);
                              }}>
                     <option>Select table</option>
                     <option value="Table 1">Table 1</option>
@@ -66,14 +76,13 @@ function KitchenView() {
                 <Row className="table-container">
                     <h2 className="mb-3">{selectedTable}</h2>
                     <p>Available: {TABLES[selectedTable].available ? 'Yes' : 'No'}</p>
-                    <p>Items to be delivered?: TODO COMPLETE</p>
 
-                    {/*Displays only when adding items to order*/}
+                    {/*Displays only when items need to be cooked*/}
                     {!addingItems ? (
                         <Button className="mb-3" onClick={(e) => {
                             e.preventDefault();
                             setAddingItems(true);
-                        }}> Add items to order: </Button>
+                        }}> Add items to order </Button>
                     ) : (
                         <Container style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', }}>
                             <Form>
@@ -102,8 +111,42 @@ function KitchenView() {
                                 </Form.Group>
                                 <Button className="mb-3" type="submit" onClick={(e) => {
                                     e.preventDefault();
-                                    readyItems();
+                                    handleItemAdded();
+                                    // readyItems();
                                 }}>Add to order</Button>
+                            </Form>
+                        </Container>
+                    )}
+
+                    {!markingReady ? (
+                        <Button className="mb-3" onClick={(e) => {
+                            setMarkingReady(true);
+                        }}> Set Item Ready </Button>
+                    ) : (
+                        <Container style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', }}>
+                            <Form>
+                                <Form.Group controlId="formNumberInput" className="mb-3">
+                                    <Form.Label>Select item to mark ready</Form.Label>
+                                    <option>Select Item</option>
+                                    <Form.Select required aria-label="Default select example"
+                                                 value={selectedItemIdx}
+                                                 onChange={(e) => {
+
+                                                     console.log(e.target.value);
+                                                     setSelectedItemIdx(e.target.value)
+                                                 }}>
+                                        value={TABLES[selectedTable].tab.map((item, index) => {
+                                            return (
+                                                <option key={index}>
+                                                    {item.name}
+                                            </option>
+                                            )
+                                        })}>
+                                    </Form.Select>
+                                </Form.Group>
+                                <Button className="mb-3" type="submit" onClick={(e) => {
+                                    readyItems();
+                                }}>Mark Ready</Button>
                             </Form>
                         </Container>
                     )}
@@ -113,7 +156,6 @@ function KitchenView() {
                         <tr>
                             <th>#</th>
                             <th>Item</th>
-                            <th>Price</th>
                             <th>Quantity</th>
                             <th>Status</th>
                         </tr>

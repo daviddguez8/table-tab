@@ -3,7 +3,6 @@ import { TABLES } from "../data/tables";
 export const addItemsToOrder = (tableName, items = []) => {
     const table = TABLES[tableName];
     items.forEach((item) => {
-
         item.status = 'ordered';
         item.paid = false;
         item.cooked = false;

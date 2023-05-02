@@ -1,12 +1,11 @@
-import { TABLES } from "../data/tables";
+import * as table from "@testing-library/user-event/dist/tab";
 
-export const addItemToCook = (tableName, item) => {
-    const table = TABLES[tableName];
-
-    item.status = 'Cooking';
-    item.paid = false;
-    item.cooked = false;
-    table.tab.push(item);
+export const itemsToCook = (tableName) => {
+    const items = table.tab;
+    items.status = 'Cooking';
+    items.paid = false;
+    items.cooked = false;
+    table.tab.push(items);
 
     return table.tab;
 }

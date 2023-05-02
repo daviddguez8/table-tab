@@ -30,17 +30,5 @@ export const MENU = [
     {
         name: 'Burrito',
         price: 8.99,
-    },
-    {
-        name: 'Sergio\'s Mom',
-        price: 0,
-    },
-    {
-        name: 'Alan\'s Mom and Sister',
-        price: 0,
-    },
-    {
-        name: 'David\'s Sisters',
-        price: 0,
-    },
+    }
 ];

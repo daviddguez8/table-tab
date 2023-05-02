@@ -1,4 +1,3 @@
-
 import { render } from "@testing-library/react";
 import { addItemsToOrder, addItemToOrder } from "../addToOrder";
 import { TABLES } from "../../data/tables";
