@@ -21,3 +21,11 @@ export const getNextAvailable = (people) => {
     }
     return availableTable; // no available tables found
 };
+
+export const selectTable = (tableName) => {
+    const table = TABLES[tableName];
+
+    table.waiterAssigned = true;
+
+    return table;
+}

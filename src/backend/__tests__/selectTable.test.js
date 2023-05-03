@@ -1,4 +1,5 @@
 import { getNextAvailable } from "../selectTable";
+import { selectTable } from "../selectTable";
 import { TABLES } from "../../data/tables";
 
 describe('getNextAvailable', () => {
@@ -32,4 +33,19 @@ describe('getNextAvailable', () => {
         const result = getNextAvailable(people, TABLES);
         expect(result).toBe(expectedTable);
     });
+})
+
+describe('selectTable', () => {
+  it('allows a waiter to select a specific table', () => {
+
+    const tableName = 'Table 1';
+
+    const initialTableWaiter = TABLES[tableName].waiterAssigned
+
+    expect(initialTableWaiter).toBe(false);
+
+    const updatedTableWaiter = selectTable(tableName).waiterAssigned;
+
+    expect(updatedTableWaiter).toBe(true);
+  });
 });

@@ -1,9 +1,12 @@
-import { Container, Form, Row, Button, Table, InputGroup, ListGroup } from 'react-bootstrap';
+import { Container, Form, Row, Button, Table } from 'react-bootstrap';
 import './waiterView.css';
-import { useState } from 'react';
-import { TABLES } from '../../data/tables';
+import { useEffect, useState } from 'react';
+//import { TABLES } from '../../data/tables';
 import { MENU } from '../../data/menu';
 import { addItemToOrder } from '../../backend/addToOrder';
+import { STATUSES } from '../../data/statuses';
+import { fetchToTables, pushMenuToFirebase, pushTableToFirebase } from '../../backend/firestore';
+import { deleteItemFromTab } from '../../backend/deleteFromTab';
 
 
 function WaiterView() {
@@ -12,56 +15,119 @@ function WaiterView() {
 
     const [selectedItemIdx, setSelectedItemIdx] = useState(-1);
     const [selectedItemQuantity, setSelectedItemQuantity] = useState(0);
-   
 
-    const handleItemAdded = () => {
-        console.log(selectedItemIdx);
-        const itemToAdd = MENU[selectedItemIdx];
-        console.log(itemToAdd);
+    const [TABLES, setTables] = useState({});
+
+    useEffect(() => {
+        fetchToTables(setTables)
+    }, []);
+
+    useEffect(() => {
+        console.log(selectedTable);
+    }, [selectedTable])
+
+
+    const handleItemAdded = async () => {
+        if (selectedItemIdx == -1) {
+            alert('Please select an item from the menu');
+            return;
+        }
+
+        if (selectedItemQuantity <=0) {
+            alert('Please select a quantity greater than 0');
+            setSelectedItemQuantity(1);
+            return;
+        }
+        const itemInMenu = MENU[selectedItemIdx];
+        const itemToAdd = { name: itemInMenu.name, price: itemInMenu.price };
         itemToAdd.quantity = selectedItemQuantity;
 
-        addItemToOrder(selectedTable, itemToAdd);
-    
+        TABLES[selectedTable].tab = [...TABLES[selectedTable].tab, itemToAdd];
+        
+        await pushTableToFirebase(TABLES[selectedTable]);
+        await fetchToTables(setTables);
+
         setSelectedItemQuantity(0);
         setSelectedItemIdx(-1);
+    }
+    
+    //TODO: Implement this function and correctly connect
+    const handleStatusChange = (itemIdx, newStatus) => {
+
+    }
+
+    const calculateTotal = (tab) => {
+        let total = 0;
+        tab.forEach(item => {
+            total += item.price * item.quantity;
+        });
+        return total.toFixed(2);
+    }
+
+    const calculateTotalPaid = (tab) => {
+        let total = 0;
+        tab.forEach(item => {
+            if (item.status === STATUSES.PAID) {
+                total += item.price * item.quantity;
+            }
+        });
+        return total.toFixed(2);
+    }
+
+    const calculateBalance = (tab) => {
+        return calculateTotal(tab) - calculateTotalPaid(tab);
+    }
+
+    const handleDeleteItem = (itemTabIndex) => {
+        TABLES[selectedTable].tab = deleteItemFromTab(TABLES[selectedTable].tab, itemTabIndex)
+        setTables(TABLES);
+        pushTableToFirebase(TABLES[selectedTable]).then(() => {
+            fetchToTables(setTables);
+        });
+        
     }
 
     return (
         <Container className="main-container">
             <Row className='fixed-top topbar'>
-                <h1>Waiter View</h1>
+                <h1>TableTab</h1>
             </Row>
 
             <Row className="content-container mb-3">
                 <h3>Select a table from below:</h3>
                 <Form.Select aria-label="Default select example"
+                    key={selectedTable}
+                    value={selectedTable}
                     onChange={(e) => {
                         e.preventDefault();
                         setSelectedTable(e.target.value)
+                        
                     }}>
                     <option>Select table</option>
-                    <option value="Table 1">Table 1</option>
-                    <option value="Table 2">Table 2</option>
-                    <option value="Table 3">Table 3</option>
-                    <option value="Table 3">Table 4</option>
+                    {Object.keys(TABLES).sort().map((tableName, idx) => {
+                        return <option value={tableName} key={idx} style={ TABLES[tableName].needsHelp? {backgroundColor: "red"}:{}}>{tableName}</option>
+                    })}
                 </Form.Select>
-
-
             </Row>
-            
+
             {/*Displays only when a table is selected*/}
             {selectedTable !== '' &&
-                <Row className="table-container">
+                <Row className="table-container mb-3">
+                    <Container className="table-info-container mb-3">
+                        
                     <h2 className="mb-3">{selectedTable}</h2>
                     <p>Available: {TABLES[selectedTable].available ? 'Yes' : 'No'}</p>
                     <p>Num People: {TABLES[selectedTable].people}</p>
-                    <p>Total ordered: $ TODO COMPLETE</p>
-                    <p>Total paid: $ TODO COMPLETE</p>
-                    <p>Needs Help: {TABLES[selectedTable].needsHelp ? 'Yes' : 'No'}</p>
+                    <p>Total ordered: $ {calculateTotal(TABLES[selectedTable].tab)}</p>
+                    <p>Total paid: $ {calculateTotalPaid(TABLES[selectedTable].tab)}</p>
+                    <p>Remaining balance: $ {calculateBalance(TABLES[selectedTable].tab)}</p>
+                    {/*TODO: Complete attend call funcionality */}
+                    <p>Needs Help: {TABLES[selectedTable].needsHelp ? 'Yes' : 'No'} <Button variant="outline-info">Attend call</Button></p>
+                    {/*TODO: Complete this functionality */}
                     <p>Items to be delivered?: TODO COMPLETE</p>
 
-
-
+                    </Container>
+                    
                     {/*Displays only when adding items to order*/}
                     {!addingItems ? (
                         <Button className="mb-3" onClick={(e) => {
@@ -72,9 +138,8 @@ function WaiterView() {
                         <Container style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', }}>
                             <Form>
                                 <Form.Select required aria-label="Default select example"
-                                    value={selectedItemIdx}
+                                    value={MENU[selectedItemIdx] ? selectedItemIdx : -1}
                                     onChange={(e) => {
-
                                         console.log(e.target.value);
                                         setSelectedItemIdx(e.target.value)
                                     }}>
@@ -98,7 +163,6 @@ function WaiterView() {
                                     e.preventDefault();
                                     handleItemAdded();
                                 }}>Add to order</Button>
-
                             </Form>
                         </Container>
                     )}
@@ -121,16 +185,28 @@ function WaiterView() {
                                         <td>{item.name}</td>
                                         <td>{item.price}</td>
                                         <td>{item.quantity}</td>
-                                        <td>{item.status}</td>
+                                        <td>
+                                            <Form.Select required aria-label="Default select example"
+                                                defaultValue={item.status}
+                                                onChange={(e) => { handleStatusChange(index, e.target.value) }}>
+                                                {Object.values(STATUSES).map((status) => {
+                                                    return (
+                                                        <option key={status} selected={item.status === status}>{status}</option>
+                                                    )
+                                                })}
+                                            </Form.Select>
+                                        </td>
+                                        <td>
+                                            <Button variant="danger" onClick={() => {handleDeleteItem(index)}}>Delete</Button>
+                                        </td>
                                     </tr>
                                 )
                             })}
                         </tbody>
                     </Table>
                 </Row>
-            }
+            } 
         </Container>
-
     );
 }
 
