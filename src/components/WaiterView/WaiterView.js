@@ -32,6 +32,12 @@ function WaiterView() {
             alert('Please select an item from the menu');
             return;
         }
+
+        if (selectedItemQuantity <=0) {
+            alert('Please select a quantity greater than 0');
+            setSelectedItemQuantity(1);
+            return;
+        }
         const itemInMenu = MENU[selectedItemIdx];
         const itemToAdd = { name: itemInMenu.name, price: itemInMenu.price };
         itemToAdd.quantity = selectedItemQuantity;
@@ -44,7 +50,8 @@ function WaiterView() {
         setSelectedItemQuantity(0);
         setSelectedItemIdx(-1);
     }
-
+    
+    //TODO: Implement this function and correctly connect
     const handleStatusChange = (itemIdx, newStatus) => {
 
     }
@@ -83,7 +90,7 @@ function WaiterView() {
     return (
         <Container className="main-container">
             <Row className='fixed-top topbar'>
-                <h1>Waiter View</h1>
+                <h1>TableTab</h1>
             </Row>
 
             <Row className="content-container mb-3">
