@@ -5,11 +5,11 @@ import { KITCHEN_STATUSES } from "../../data/statuses";
 import {fetchToTables, pushTableToFirebase} from "../../backend/firestore";
 
 
-// This is the kitchen view. l
+// This is the kitchen view.
 function KitchenView() {
     const [selectedTable] = useState('');
     const [TABLES, setTables] = useState({});
-    const [ setItems] = useState([]);
+    const [ item, setItems] = useState([]);
 
     useEffect(() => {
         fetchToTables(setTables)
@@ -61,8 +61,9 @@ function KitchenView() {
                         {/*TABLES[selectedTable]*/}
                         {Object.keys(TABLES).map((tableId) => {
                             const table = TABLES[tableId];
-                            console.log(table)
+                            // console.log(TABLES[tableId])
                             return table.tab.map((item, index) => {
+                                console.log("Grillo", table)
                                 return (
                                     <tr key={`${tableId}-${index}`}>
                                         <td>{tableId}</td>
