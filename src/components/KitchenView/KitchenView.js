@@ -7,7 +7,6 @@ import {fetchToTables, pushTableToFirebase} from "../../backend/firestore";
 
 // This is the kitchen view.
 function KitchenView() {
-    const [selectedTable] = useState('');
     const [TABLES, setTables] = useState({});
     const [ item, setItems] = useState([]);
 
@@ -16,11 +15,11 @@ function KitchenView() {
     }, []);
 
     const handleStatusChange = async (tableId, itemIdx, newStatus) => {
-        const item = TABLES[selectedTable].tab[itemIdx];
+        const item = TABLES[tableId].tab[itemIdx];
         item.status = newStatus;
-        TABLES[selectedTable].tab[itemIdx] = item;
-
-        await pushTableToFirebase(TABLES[selectedTable]);
+        TABLES[tableId].tab[itemIdx] = item;
+        console.log("Status", newStatus)
+        await pushTableToFirebase(TABLES[tableId]);
         await fetchToTables(setTables);
     }
 
@@ -40,8 +39,6 @@ function KitchenView() {
                 <h2>Kitchen View</h2>
             </Row>
 
-            {/*Displays only when a table is selected*/}
-            {/*{selectedTable !== '' &&*/}
                 <Row className="table-container">
                     <Container className="table-info-container mb-3">
                         <h3 className="mb-3">Items to Cook</h3>
@@ -89,9 +86,7 @@ function KitchenView() {
                                                         onClick={() => handleItemReady(index, item)}>
                                                     Item is Ready
                                                 </Button>
-                                            ): item.status === 'Cooking' ? (
-                                                <span>Cooking...</span>
-                                            ) : null}
+                                            ) : <span>Cooking...</span>}
                                         </td>
                                     </tr>
                                 )
