@@ -69,9 +69,7 @@ export const pushTablesToFirebaseEmergency = async () => {
 
     // Loop through the TABLES dictionary and add each object as a document to the 'tables' collection
     Object.keys(TABLES).forEach(tableName => {
-        // Create a reference to the document with the custom ID
-        const tableDocRef = doc(tablesCollection, tableName);
-
+       
         //Create a new doc in the tables collection with custom ID
         addDoc(tablesCollection, {
             name: tableName,
