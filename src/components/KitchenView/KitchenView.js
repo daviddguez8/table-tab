@@ -6,7 +6,7 @@ import {fetchToTables, pushTableToFirebase} from "../../backend/firestore";
 import {deleteItemFromTab} from "../../backend/deleteFromTab";
 
 
-// This is the kitchen view.
+// This is the kitchen view. l
 function KitchenView() {
     const [selectedTable, setSelectedTable] = useState('');
     const [TABLES, setTables] = useState({});
