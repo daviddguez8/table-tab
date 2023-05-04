@@ -4,26 +4,6 @@ import { app } from '../firebaseConfig.js';
 import { TABLES } from '../data/tables.js';
 
 
-export const pushMenuToFirebase = async () => {
-    // Get a reference to the 'menu' collection
-    const db = getFirestore(app);
-    const menuCollection = collection(db, 'menu');
-
-    // Loop through the MENU array and add each object as a document to the 'menu' collection
-    MENU.forEach(menuItem => {
-        //Create a new doc in the menu collection with custom ID
-        addDoc(menuCollection, {
-            name: menuItem.name,
-            price: menuItem.price,
-        })
-            .then((docRef) => {
-                console.log("Document written with ID: ", docRef.id);
-            })
-            .catch((error) => {
-                console.error("Error adding document: ", error);
-            });
-    });
-};
 
 export const pushTableToFirebase = async (table) => {
     // Get a reference to the 'tables' collection
@@ -82,16 +62,14 @@ export const fetchToTables = async (setTables) => {
 
 
 //WARNING: This function will overwrite the entire table collection in the database, use only after resetting the collection manually
-export const pushTablesToFirebase = async () => {
+export const pushTablesToFirebaseEmergency = async () => {
     // Get a reference to the 'tables' collection
     const db = getFirestore(app);
     const tablesCollection = collection(db, 'tables');
 
     // Loop through the TABLES dictionary and add each object as a document to the 'tables' collection
     Object.keys(TABLES).forEach(tableName => {
-        // Create a reference to the document with the custom ID
-        const tableDocRef = doc(tablesCollection, tableName);
-
+       
         //Create a new doc in the tables collection with custom ID
         addDoc(tablesCollection, {
             name: tableName,
@@ -102,6 +80,28 @@ export const pushTablesToFirebase = async () => {
             waiter: TABLES[tableName].waiter,
             tab: TABLES[tableName].tab,
             waiterAssigned: TABLES[tableName].waiterAssigned
+        })
+            .then((docRef) => {
+                console.log("Document written with ID: ", docRef.id);
+            })
+            .catch((error) => {
+                console.error("Error adding document: ", error);
+            });
+    });
+};
+
+
+export const pushMenuToFirebaseEmergency = async () => {
+    // Get a reference to the 'menu' collection
+    const db = getFirestore(app);
+    const menuCollection = collection(db, 'menu');
+
+    // Loop through the MENU array and add each object as a document to the 'menu' collection
+    MENU.forEach(menuItem => {
+        //Create a new doc in the menu collection with custom ID
+        addDoc(menuCollection, {
+            name: menuItem.name,
+            price: menuItem.price,
         })
             .then((docRef) => {
                 console.log("Document written with ID: ", docRef.id);
