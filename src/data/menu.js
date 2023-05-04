@@ -32,3 +32,4 @@ export const MENU = [
         price: 8.99,
     }
 ];
+
