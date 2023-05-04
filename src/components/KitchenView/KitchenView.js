@@ -1,4 +1,4 @@
-import { Container, Form, Row, Button, Table, InputGroup, ListGroup } from 'react-bootstrap';
+import { Container, Form, Row, Button, Table } from 'react-bootstrap';
 import './KitchenView.css';
 import { useState } from 'react';
 import { TABLES } from '../../data/tables';
@@ -10,7 +10,6 @@ import { addItemToOrder } from '../../backend/addToOrder';
 
 function KitchenView() {
     const [selectedTable, setSelectedTable] = useState('');
-    const [addingItems, setAddingItems] = useState(false);
     const [markingReady, setMarkingReady] = useState(false);
     const [selectedItemIdx, setSelectedItemIdx] = useState(-1);
     const [selectedItemQuantity, setSelectedItemQuantity] = useState(0);
@@ -76,47 +75,6 @@ function KitchenView() {
                 <Row className="table-container">
                     <h2 className="mb-3">{selectedTable}</h2>
                     <p>Available: {TABLES[selectedTable].available ? 'Yes' : 'No'}</p>
-
-                    {/*Displays only when items need to be cooked*/}
-                    {!addingItems ? (
-                        <Button className="mb-3" onClick={(e) => {
-                            e.preventDefault();
-                            setAddingItems(true);
-                        }}> Add items to order </Button>
-                    ) : (
-                        <Container style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', }}>
-                            <Form>
-                                <Form.Select required aria-label="Default select example"
-                                             value={selectedItemIdx}
-                                             onChange={(e) => {
-
-                                                 console.log(e.target.value);
-                                                 setSelectedItemIdx(e.target.value)
-                                             }}>
-                                    <option>Select Item</option>
-                                    {MENU.map((item, index) => {
-                                        return (
-                                            <option
-                                                key={index}
-                                                value={index}
-                                            >
-                                                {item.name} - {item.price}
-                                            </option>
-                                        )
-                                    })}
-                                </Form.Select>
-                                <Form.Group controlId="formNumberInput" className="mb-3">
-                                    <Form.Label>Quantity:</Form.Label>
-                                    <Form.Control value={selectedItemQuantity} required type="number" placeholder="Enter a number" onChange={(e) => { setSelectedItemQuantity(e.target.value) }} />
-                                </Form.Group>
-                                <Button className="mb-3" type="submit" onClick={(e) => {
-                                    e.preventDefault();
-                                    handleItemAdded();
-                                    // readyItems();
-                                }}>Add to order</Button>
-                            </Form>
-                        </Container>
-                    )}
 
                     {!markingReady ? (
                         <Button className="mb-3" onClick={(e) => {

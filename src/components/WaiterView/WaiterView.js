@@ -84,7 +84,6 @@ function WaiterView() {
         pushTableToFirebase(TABLES[selectedTable]).then(() => {
             fetchToTables(setTables);
         });
-        
     }
 
     return (
@@ -101,7 +100,7 @@ function WaiterView() {
                     onChange={(e) => {
                         e.preventDefault();
                         setSelectedTable(e.target.value)
-                        
+
                     }}>
                     <option>Select table</option>
                     {Object.keys(TABLES).sort().map((tableName, idx) => {
