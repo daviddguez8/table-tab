@@ -1,49 +1,34 @@
 import { Container, Form, Row, Button, Table } from 'react-bootstrap';
 import './KitchenView.css';
-import { useState } from 'react';
-import { TABLES } from '../../data/tables';
-import { MENU } from '../../data/menu';
-import { itemsToCook } from '../../backend/foodQueue';
-import { markItemReady } from '../../backend/markReady';
-import { addItemToOrder } from '../../backend/addToOrder';
+import { useEffect, useState } from 'react';
+import {STATUSES} from "../../data/statuses";
+import {fetchToTables, pushTableToFirebase} from "../../backend/firestore";
+import {deleteItemFromTab} from "../../backend/deleteFromTab";
 
 
 function KitchenView() {
     const [selectedTable, setSelectedTable] = useState('');
-    const [markingReady, setMarkingReady] = useState(false);
-    const [selectedItemIdx, setSelectedItemIdx] = useState(-1);
-    const [selectedItemQuantity, setSelectedItemQuantity] = useState(0);
+    const [TABLES, setTables] = useState({});
 
-    const queue = () => {
-        const itemToAdd = MENU[selectedItemIdx];
-        console.log(itemToAdd);
-        const tableTab = TABLES[selectedTable];
+    useEffect(() => {
+        fetchToTables(setTables)
+    }, []);
 
-        // console.log(selectedTableTab);
-        // console.log(items);
-        // items.tab = selectedTableTab;
-        itemsToCook(tableTab)
-        // itemToCook(selectedTable, items);
-        // setSelectedTableTab([]);
+    const handleStatusChange = async (itemIdx, newStatus) => {
+        const item = TABLES[selectedTable].tab[itemIdx];
+        item.status = newStatus;
+        TABLES[selectedTable].tab[itemIdx] = item;
+
+        await pushTableToFirebase(TABLES[selectedTable]);
+        await fetchToTables(setTables);
     }
 
-    const readyItems = () => {
-        console.log(selectedItemIdx);
-        const items = TABLES[selectedTable];
-        console.log(items.tab);
-        markItemReady(selectedTable, items);
-        setSelectedItemQuantity(0);
-        setSelectedItemIdx(-1);
-    }
-
-    const handleItemAdded = () => {
-        console.log(selectedItemIdx);
-        const itemToAdd = MENU[selectedItemIdx];
-        console.log(itemToAdd);
-        itemToAdd.quantity = selectedItemQuantity;
-        addItemToOrder(selectedTable, itemToAdd);
-        setSelectedItemQuantity(0);
-        setSelectedItemIdx(-1);
+    const handleDeleteItem = (itemTabIndex) => {
+        TABLES[selectedTable].tab = deleteItemFromTab(TABLES[selectedTable].tab, itemTabIndex)
+        setTables(TABLES);
+        pushTableToFirebase(TABLES[selectedTable]).then(() => {
+            fetchToTables(setTables);
+        });
     }
 
     return (
@@ -53,70 +38,40 @@ function KitchenView() {
             </Row>
 
             <Row className="content-container mb-3">
-                <h3>Items to cook</h3>
+                <h3>Select a table from below:</h3>
                 <Form.Select aria-label="Default select example"
+                             key={selectedTable}
+                             value={selectedTable}
                              onChange={(e) => {
                                  e.preventDefault();
-                                 setSelectedTable(e.target.value);
+                                 setSelectedTable(e.target.value)
+
                              }}>
                     <option>Select table</option>
-                    <option value="Table 1">Table 1</option>
-                    <option value="Table 2">Table 2</option>
-                    <option value="Table 3">Table 3</option>
-                    <option value="Table 4">Table 4</option>
-                    <option value="Table 5">Table 5</option>
-                    <option value="Table 6">Table 6</option>
-                    <option value="Table 7">Table 7</option>
+                    {Object.keys(TABLES).sort().map((tableName, idx) => {
+                        return <option value={tableName} key={idx} style={ TABLES[tableName].needsHelp? {backgroundColor: "red"}:{}}>{tableName}</option>
+                    })}
                 </Form.Select>
             </Row>
 
             {/*Displays only when a table is selected*/}
             {selectedTable !== '' &&
                 <Row className="table-container">
-                    <h2 className="mb-3">{selectedTable}</h2>
-                    <p>Available: {TABLES[selectedTable].available ? 'Yes' : 'No'}</p>
-
-                    {!markingReady ? (
-                        <Button className="mb-3" onClick={(e) => {
-                            setMarkingReady(true);
-                        }}> Set Item Ready </Button>
-                    ) : (
-                        <Container style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', }}>
-                            <Form>
-                                <Form.Group controlId="formNumberInput" className="mb-3">
-                                    <Form.Label>Select item to mark ready</Form.Label>
-                                    <option>Select Item</option>
-                                    <Form.Select required aria-label="Default select example"
-                                                 value={selectedItemIdx}
-                                                 onChange={(e) => {
-
-                                                     console.log(e.target.value);
-                                                     setSelectedItemIdx(e.target.value)
-                                                 }}>
-                                        value={TABLES[selectedTable].tab.map((item, index) => {
-                                            return (
-                                                <option key={index}>
-                                                    {item.name}
-                                            </option>
-                                            )
-                                        })}>
-                                    </Form.Select>
-                                </Form.Group>
-                                <Button className="mb-3" type="submit" onClick={(e) => {
-                                    readyItems();
-                                }}>Mark Ready</Button>
-                            </Form>
-                        </Container>
-                    )}
+                    <Container className="table-info-container mb-3">
+                        <h2 className="mb-3">{selectedTable}</h2>
+                        {/*TODO: Complete attend call funcionality */}
+                        {/*TODO: Complete this functionality */}
+                        <p>Items to be delivered?: TODO COMPLETE</p>
+                    </Container>
 
                     <Table striped bordered hover>
                         <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Item</th>
-                            <th>Quantity</th>
-                            <th>Status</th>
-                        </tr>
+                            <tr>
+                                <th>#</th>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                                <th>Status</th>
+                            </tr>
                         </thead>
                         <tbody>
                         {TABLES[selectedTable].tab.map((item, index) => {
@@ -126,6 +81,20 @@ function KitchenView() {
                                     <td>{item.name}</td>
                                     <td>{item.quantity}</td>
                                     <td>{item.status}</td>
+                                    <td>
+                                        <Form.Select required aria-label="Default select example"
+                                                     defaultValue={item.status}
+                                                     onChange={(e) => { handleStatusChange(index, e.target.value) }}>
+                                            {Object.values(STATUSES).map((status) => {
+                                                return (
+                                                    <option key={status} selected={item.status === status}>{status}</option>
+                                                )
+                                            })}
+                                        </Form.Select>
+                                    </td>
+                                    <td>
+                                        <Button variant="danger" onClick={() => {handleDeleteItem(index)}}>Delete</Button>
+                                    </td>
                                 </tr>
                             )
                         })}

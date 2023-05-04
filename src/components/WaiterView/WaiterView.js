@@ -12,7 +12,6 @@ import { deleteItemFromTab } from '../../backend/deleteFromTab';
 function WaiterView() {
     const [selectedTable, setSelectedTable] = useState('');
     const [addingItems, setAddingItems] = useState(false);
-
     const [selectedItemIdx, setSelectedItemIdx] = useState(-1);
     const [selectedItemQuantity, setSelectedItemQuantity] = useState(0);
 
