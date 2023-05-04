@@ -51,9 +51,13 @@ function WaiterView() {
         setSelectedItemIdx(-1);
     }
     
-    //TODO: Implement this function and correctly connect
-    const handleStatusChange = (itemIdx, newStatus) => {
+    const handleStatusChange = async (itemIdx, newStatus) => {
+        const item = TABLES[selectedTable].tab[itemIdx];
+        item.status = newStatus;
+        TABLES[selectedTable].tab[itemIdx] = item;
 
+        await pushTableToFirebase(TABLES[selectedTable]);
+        await fetchToTables(setTables);
     }
 
     const calculateTotal = (tab) => {
