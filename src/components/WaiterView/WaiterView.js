@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 //import { TABLES } from '../../data/tables';
 import { MENU } from '../../data/menu';
 import { addItemToOrder } from '../../backend/addToOrder';
-import { STATUSES } from '../../data/statuses';
+import { KITCHEN_STATUSES, STATUSES } from '../../data/statuses';
 import { fetchToTables, pushMenuToFirebase, pushTableToFirebase } from '../../backend/firestore';
 import { deleteItemFromTab } from '../../backend/deleteFromTab';
 
@@ -81,6 +81,15 @@ function WaiterView() {
         return calculateTotal(tab) - calculateTotalPaid(tab);
     }
 
+    const checkItemsToBeDelivered = (tab) => {
+        tab.forEach(item => {
+            if (item.status === KITCHEN_STATUSES.COOKED) {
+                return true;
+            }
+        });
+        return false;
+    }
+
     const handleDeleteItem = (itemTabIndex) => {
         TABLES[selectedTable].tab = deleteItemFromTab(TABLES[selectedTable].tab, itemTabIndex)
         setTables(TABLES);
@@ -125,8 +134,12 @@ function WaiterView() {
                     <p>Remaining balance: $ {calculateBalance(TABLES[selectedTable].tab)}</p>
                     {/*TODO: Complete attend call funcionality */}
                     <p>Needs Help: {TABLES[selectedTable].needsHelp ? 'Yes' : 'No'} <Button variant="outline-info">Attend call</Button></p>
-                    {/*TODO: Complete this functionality */}
-                    <p>Items to be delivered?: TODO COMPLETE</p>
+                    <p>
+                        Items to be delivered?:&nbsp;
+                        <span style={{color: `${checkItemsToBeDelivered(TABLES[selectedTable].tab) ? 'green' : 'red'}`}}>
+                            {checkItemsToBeDelivered(TABLES[selectedTable].tab) ? 'YES' : 'NO'}
+                        </span>
+                    </p>
 
                     </Container>
                     
