@@ -1,15 +1,15 @@
-import {Container, Form, Row, Button, Table, Col} from 'react-bootstrap';
+import {Container, Form, Row, Button, Table} from 'react-bootstrap';
 import './KitchenView.css';
 import { useEffect, useState } from 'react';
-import {KITCHEN_STATUSES, STATUSES} from "../../data/statuses";
+import { KITCHEN_STATUSES } from "../../data/statuses";
 import {fetchToTables, pushTableToFirebase} from "../../backend/firestore";
-import {deleteItemFromTab} from "../../backend/deleteFromTab";
 
 
 // This is the kitchen view. l
 function KitchenView() {
-    const [selectedTable, setSelectedTable] = useState('');
+    const [selectedTable] = useState('');
     const [TABLES, setTables] = useState({});
+    const [ setItems] = useState([]);
 
     useEffect(() => {
         fetchToTables(setTables)
@@ -24,12 +24,10 @@ function KitchenView() {
         await fetchToTables(setTables);
     }
 
-    const handleDeleteItem = (itemTabIndex) => {
-        TABLES[selectedTable].tab = deleteItemFromTab(TABLES[selectedTable].tab, itemTabIndex)
-        setTables(TABLES);
-        pushTableToFirebase(TABLES[selectedTable]).then(() => {
-            fetchToTables(setTables);
-        });
+    const handleItemReady = (index, item) => {
+        const updatedItems = [item];
+        updatedItems.splice(index, 1);
+        setItems(updatedItems);
     }
 
     return (
@@ -47,9 +45,6 @@ function KitchenView() {
                 <Row className="table-container">
                     <Container className="table-info-container mb-3">
                         <h3 className="mb-3">Items to Cook</h3>
-                        {/*TODO: Complete attend call funcionality */}
-                        {/*TODO: Complete this functionality */}
-                        <p>Items to be delivered?: TODO COMPLETE</p>
                     </Container>
 
                     <Table striped bordered hover>
@@ -59,12 +54,14 @@ function KitchenView() {
                                 <th>Item</th>
                                 <th>Quantity</th>
                                 <th>Status</th>
+                                <th>Call Waiter?</th>
                             </tr>
                         </thead>
                         <tbody>
                         {/*TABLES[selectedTable]*/}
                         {Object.keys(TABLES).map((tableId) => {
                             const table = TABLES[tableId];
+                            console.log(table)
                             return table.tab.map((item, index) => {
                                 return (
                                     <tr key={`${tableId}-${index}`}>
@@ -85,9 +82,16 @@ function KitchenView() {
                                                 })}
                                             </Form.Select>
                                         </td>
-                                        {item.status === 'cooked' && (
-                                            <button>Call Waiter</button>
-                                        )}
+                                        <td>
+                                            {item.status === 'Cooked' ? (
+                                                <Button className='w-100' variant='primary'
+                                                        onClick={() => handleItemReady(index, item)}>
+                                                    Item is Ready
+                                                </Button>
+                                            ): item.status === 'Cooking' ? (
+                                                <span>Cooking...</span>
+                                            ) : null}
+                                        </td>
                                     </tr>
                                 )
                             })
