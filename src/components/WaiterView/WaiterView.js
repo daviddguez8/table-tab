@@ -32,7 +32,7 @@ function WaiterView() {
             return;
         }
 
-        if (selectedItemQuantity <=0) {
+        if (selectedItemQuantity <= 0) {
             alert('Please select a quantity greater than 0');
             setSelectedItemQuantity(1);
             return;
@@ -43,21 +43,21 @@ function WaiterView() {
         itemToAdd.status = STATUSES.ORDERED;
 
         TABLES[selectedTable].tab = [...TABLES[selectedTable].tab, itemToAdd];
-        
+
         await pushTableToFirebase(TABLES[selectedTable]);
         await fetchToTables(setTables);
 
         setSelectedItemQuantity(0);
         setSelectedItemIdx(-1);
     }
-    
+
     const handleStatusChange = async (itemIdx, newStatus) => {
         const item = TABLES[selectedTable].tab[itemIdx];
         item.status = newStatus;
         TABLES[selectedTable].tab[itemIdx] = item;
 
         await pushTableToFirebase(TABLES[selectedTable]);
-        await fetchToTables(setTables);
+        fetchToTables(setTables);
     }
 
     const calculateTotal = (tab) => {
@@ -125,7 +125,7 @@ function WaiterView() {
                     }}>
                     <option>Select table</option>
                     {Object.keys(TABLES).sort().map((tableName, idx) => {
-                        return <option value={tableName} key={idx} style={ TABLES[tableName].needsHelp? {backgroundColor: "red"}:{}}>{tableName}</option>
+                        return <option value={tableName} key={idx} style={TABLES[tableName].needsHelp ? { backgroundColor: "red" } : {}}>{tableName}</option>
                     })}
                 </Form.Select>
             </Row>
@@ -134,25 +134,25 @@ function WaiterView() {
             {selectedTable !== '' &&
                 <Row className="table-container mb-3">
                     <Container className="table-info-container mb-3">
-                        
-                    <h2 className="mb-3">{selectedTable}</h2>
-                    <p>Available: {TABLES[selectedTable].available ? 'Yes' : 'No'}</p>
-                    <p>Num People: {TABLES[selectedTable].people}</p>
-                    <p>Total ordered: $ {calculateTotal(TABLES[selectedTable].tab)}</p>
-                    <p>Total paid: $ {calculateTotalPaid(TABLES[selectedTable].tab)}</p>
-                    <p>Remaining balance: $ {calculateBalance(TABLES[selectedTable].tab)}</p>
-                    {/*TODO: Complete attend call funcionality */}
-                    <p>Needs Help: {TABLES[selectedTable].needsHelp ? 
-                       <Button onClick={()=> {handleAttendCall(selectedTable)}} variant="outline-info">Attend call</Button> : 'No'} </p>
-                    <p>
-                        Items to be delivered?:&nbsp;
-                        <span style={{color: `${checkItemsToBeDelivered(TABLES[selectedTable].tab) ? 'green' : 'red'}`}}>
-                            {checkItemsToBeDelivered(TABLES[selectedTable].tab) ? 'YES' : 'NO'}
-                        </span>
-                    </p>
+
+                        <h2 className="mb-3">{selectedTable}</h2>
+                        <p>Available: {TABLES[selectedTable].available ? 'Yes' : 'No'}</p>
+                        <p>Num People: {TABLES[selectedTable].people}</p>
+                        <p>Total ordered: $ {calculateTotal(TABLES[selectedTable].tab)}</p>
+                        <p>Total paid: $ {calculateTotalPaid(TABLES[selectedTable].tab)}</p>
+                        <p>Remaining balance: $ {calculateBalance(TABLES[selectedTable].tab)}</p>
+                        {/*TODO: Complete attend call funcionality */}
+                        <p>Needs Help: {TABLES[selectedTable].needsHelp ?
+                            <Button onClick={() => { handleAttendCall(selectedTable) }} variant="outline-info">Attend call</Button> : 'No'} </p>
+                        <p>
+                            Items to be delivered?:&nbsp;
+                            <span style={{ color: `${checkItemsToBeDelivered(TABLES[selectedTable].tab) ? 'green' : 'red'}` }}>
+                                {checkItemsToBeDelivered(TABLES[selectedTable].tab) ? 'YES' : 'NO'}
+                            </span>
+                        </p>
 
                     </Container>
-                    
+
                     {/*Displays only when adding items to order*/}
                     {!addingItems ? (
                         <Button className="mb-3" onClick={(e) => {
@@ -166,7 +166,7 @@ function WaiterView() {
                                     value={MENU[selectedItemIdx] ? selectedItemIdx : -1}
                                     onChange={(e) => {
                                         console.log(e.target.value);
-                                        setSelectedItemIdx(e.target.value)
+                                        setSelectedItemIdx(e.target.value);
                                     }}>
                                     <option>Select Item</option>
                                     {MENU.map((item, index) => {
@@ -211,18 +211,23 @@ function WaiterView() {
                                         <td>{item.price}</td>
                                         <td>{item.quantity}</td>
                                         <td>
-                                            <Form.Select required aria-label="Default select example"
-                                                defaultValue={item.status}
-                                                onChange={(e) => { handleStatusChange(index, e.target.value) }}>
-                                                {Object.values(STATUSES).map((status) => {
-                                                    return (
-                                                        <option key={status} selected={item.status === status}>{status}</option>
-                                                    )
-                                                })}
-                                            </Form.Select>
+                                            {item.status === KITCHEN_STATUSES.COOKED ? (
+                                                <Button variant="success" onClick={() => { handleStatusChange(index, STATUSES.DELIVERED) }}>Delivered</Button>
+                                            ) : (
+                                                <Form.Select required aria-label="Default select example"
+                                                    defaultValue={item.status}
+                                                    onChange={(e) => { handleStatusChange(index, e.target.value) }}>
+                                                    {Object.values(STATUSES).map((status) => {
+                                                        return (
+                                                            <option key={status}>{status}</option>
+                                                        )
+                                                    })}
+                                                </Form.Select>
+                                            )}
+
                                         </td>
                                         <td>
-                                            <Button variant="danger" onClick={() => {handleDeleteItem(index)}}>Delete</Button>
+                                            <Button variant="danger" onClick={() => { handleDeleteItem(index) }}>Delete</Button>
                                         </td>
                                     </tr>
                                 )
@@ -230,7 +235,7 @@ function WaiterView() {
                         </tbody>
                     </Table>
                 </Row>
-            } 
+            }
         </Container>
     );
 }
