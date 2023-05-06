@@ -6,7 +6,7 @@ import { Modal } from 'react-bootstrap';
 
 import { useState, useEffect } from 'react';
 import { MENU } from '../../data/menu';
-import { fetchToTables, pushMenuToFirebase, pushTableToFirebase } from '../../backend/firestore';
+import { fetchToTables, pushTableToFirebase } from '../../backend/firestore';
 
 
 function CustomerView() {
@@ -42,12 +42,13 @@ function CustomerView() {
 
   const handleCallWaiter = () => {
     // get a reference to the selected table in Firebase
-    const selectedTableRef = TABLES[selectedTable].needsHelp;
+    const selectedTableRef = TABLES[selectedTable];
     
     // update the needsHelp field to true
-    selectedTableRef.update({
-      needsHelp: true,
-    });
+    selectedTableRef.needsHelp = true;
+
+    pushTableToFirebase(selectedTableRef);
+    fetchToTables(setTables);
   };
   
 
