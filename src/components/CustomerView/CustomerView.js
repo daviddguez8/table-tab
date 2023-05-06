@@ -47,8 +47,13 @@ function CustomerView() {
     // update the needsHelp field to true
     selectedTableRef.needsHelp = true;
 
-    pushTableToFirebase(selectedTableRef);
-    fetchToTables(setTables);
+    pushTableToFirebase(selectedTableRef).then(() => {
+      fetchToTables(setTables);
+      alert('Waiter has been called! They should be arriving in a minute:)')
+    });
+
+    
+
   };
   
 

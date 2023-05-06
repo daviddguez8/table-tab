@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { MENU } from '../../data/menu';
 import { addItemToOrder } from '../../backend/addToOrder';
 import { KITCHEN_STATUSES, STATUSES } from '../../data/statuses';
-import { fetchToTables, pushMenuToFirebase, pushTableToFirebase } from '../../backend/firestore';
+import { fetchToTables, pushTableToFirebase } from '../../backend/firestore';
 import { deleteItemFromTab } from '../../backend/deleteFromTab';
 
 
@@ -27,7 +27,7 @@ function WaiterView() {
 
 
     const handleItemAdded = async () => {
-        if (selectedItemIdx == -1) {
+        if (selectedItemIdx === -1) {
             alert('Please select an item from the menu');
             return;
         }
@@ -40,6 +40,7 @@ function WaiterView() {
         const itemInMenu = MENU[selectedItemIdx];
         const itemToAdd = { name: itemInMenu.name, price: itemInMenu.price };
         itemToAdd.quantity = selectedItemQuantity;
+        itemToAdd.status = STATUSES.ORDERED;
 
         TABLES[selectedTable].tab = [...TABLES[selectedTable].tab, itemToAdd];
         
@@ -98,6 +99,14 @@ function WaiterView() {
         });
     }
 
+    const handleAttendCall = (table) => {
+        TABLES[table].needsHelp = false;
+        pushTableToFirebase(TABLES[table]).then(() => {
+            fetchToTables(setTables);
+        });
+    }
+
+
     return (
         <Container className="main-container">
             <Row className='fixed-top topbar'>
@@ -133,7 +142,8 @@ function WaiterView() {
                     <p>Total paid: $ {calculateTotalPaid(TABLES[selectedTable].tab)}</p>
                     <p>Remaining balance: $ {calculateBalance(TABLES[selectedTable].tab)}</p>
                     {/*TODO: Complete attend call funcionality */}
-                    <p>Needs Help: {TABLES[selectedTable].needsHelp ? 'Yes' : 'No'} <Button variant="outline-info">Attend call</Button></p>
+                    <p>Needs Help: {TABLES[selectedTable].needsHelp ? 
+                       <Button onClick={()=> {handleAttendCall(selectedTable)}} variant="outline-info">Attend call</Button> : 'No'} </p>
                     <p>
                         Items to be delivered?:&nbsp;
                         <span style={{color: `${checkItemsToBeDelivered(TABLES[selectedTable].tab) ? 'green' : 'red'}`}}>
