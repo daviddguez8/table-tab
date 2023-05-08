@@ -32,6 +32,15 @@ function CustomerView() {
     setShowMenu(false);
   };
 
+  const payAll = () => {
+    TABLES[selectedTable].tab = [];
+    pushTableToFirebase(TABLES[selectedTable]).then(() => {
+      fetchToTables(setTables);
+      alert('Thanks for dining with us! It was a pleasure :)');
+    });
+
+  }
+
   const handlePay = () => {
     setShowAddedItems(true);
   };
@@ -158,7 +167,7 @@ function CustomerView() {
             )}
           </Modal.Body>
         <Modal.Footer>
-          <Button variant="primary" onClick={() => {}}>
+          <Button variant="primary" onClick={() => {payAll()}}>
             Pay All
           </Button>
           <Button variant="primary" onClick={() => {}}>

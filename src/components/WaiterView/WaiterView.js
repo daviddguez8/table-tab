@@ -213,7 +213,7 @@ function WaiterView() {
                                         <td>
                                             {item.status === KITCHEN_STATUSES.COOKED ? (
                                                 <Button variant="success" onClick={() => { handleStatusChange(index, STATUSES.DELIVERED) }}>Delivered</Button>
-                                            ) : (
+                                            ) : item.status=== KITCHEN_STATUSES.COOKING ? (<p>{item.status}...</p>) : (
                                                 <Form.Select required aria-label="Default select example"
                                                     defaultValue={item.status}
                                                     onChange={(e) => { handleStatusChange(index, e.target.value) }}>
@@ -227,7 +227,7 @@ function WaiterView() {
 
                                         </td>
                                         <td>
-                                            <Button variant="danger" onClick={() => { handleDeleteItem(index) }}>Delete</Button>
+                                            <Button disabled={item.status!==STATUSES.ORDERED} variant="danger" onClick={() => { handleDeleteItem(index) }}>Delete</Button>
                                         </td>
                                     </tr>
                                 )
